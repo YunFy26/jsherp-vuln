@@ -38,10 +38,15 @@
 
 ## 1. 启动服务（从零开始）
 
+以下命令默认在仓库根目录执行（README 所在目录）：
+
+```bash
+cd <你的仓库目录>
+```
+
 ### 1.1 导入离线镜像
 
 ```bash
-cd /Users/yuntsy/My/Graduate/Vuln
 tar -c --no-xattrs --disable-copyfile -f /tmp/jsherp_33.tar -C ./jsherp.3.3 .
 docker load -i /tmp/jsherp_33.tar
 ```
@@ -55,8 +60,8 @@ Loaded image: jsherp:3.3
 ### 1.2 启动容器
 
 ```bash
-docker compose -f /Users/yuntsy/My/Graduate/Vuln/docker-compose.jsherp33.yml up -d
-docker compose -f /Users/yuntsy/My/Graduate/Vuln/docker-compose.jsherp33.yml ps
+docker compose -f ./docker-compose.jsherp33.yml up -d
+docker compose -f ./docker-compose.jsherp33.yml ps
 ```
 
 预期关键状态：
@@ -84,7 +89,6 @@ jsherp33-app     Up
 ## 2. 一键复现全部 PoC（推荐）
 
 ```bash
-cd /Users/yuntsy/My/Graduate/Vuln
 ./poc_artifacts/run_all_poc.sh
 ```
 
@@ -110,7 +114,6 @@ cd /Users/yuntsy/My/Graduate/Vuln
 3. 对比删除前后 DB 结果
 
 ```bash
-cd /Users/yuntsy/My/Graduate/Vuln
 ./poc_artifacts/poc_idor_log_msg_seeded.sh
 ```
 
@@ -132,7 +135,6 @@ cd /Users/yuntsy/My/Graduate/Vuln
 并检查这些值是否进入 `jsh_user/jsh_tenant`。
 
 ```bash
-cd /Users/yuntsy/My/Graduate/Vuln
 ./poc_artifacts/poc_register_mass_assignment.sh
 ```
 
@@ -151,7 +153,6 @@ cd /Users/yuntsy/My/Graduate/Vuln
 `test123(role=17)` 不具备供应商/客户功能菜单，但可直接访问债务查询接口：
 
 ```bash
-cd /Users/yuntsy/My/Graduate/Vuln
 ./poc_artifacts/poc_supplier_scope_bypass.sh
 ```
 
@@ -165,7 +166,6 @@ cd /Users/yuntsy/My/Graduate/Vuln
 脚本会自动注册一个新租户攻击账号，并访问 tenant63 的 `organId`：
 
 ```bash
-cd /Users/yuntsy/My/Graduate/Vuln
 ./poc_artifacts/poc_supplier_idor.sh
 ```
 
@@ -194,10 +194,9 @@ cd /Users/yuntsy/My/Graduate/Vuln
 ## 5. 环境重置（可重复复现）
 
 ```bash
-cd /Users/yuntsy/My/Graduate/Vuln
-docker compose -f /Users/yuntsy/My/Graduate/Vuln/docker-compose.jsherp33.yml down
-rm -rf /Users/yuntsy/My/Graduate/Vuln/jsherp.3.3/mysql-data
-docker compose -f /Users/yuntsy/My/Graduate/Vuln/docker-compose.jsherp33.yml up -d
+docker compose -f ./docker-compose.jsherp33.yml down
+rm -rf ./jsherp.3.3/mysql-data
+docker compose -f ./docker-compose.jsherp33.yml up -d
 ```
 
 ---
@@ -216,4 +215,3 @@ git init
 git add .
 git commit -m "init: jshERP3.3 docker setup and full PoC reproduction docs"
 ```
-
