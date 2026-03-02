@@ -25,25 +25,3 @@
 属于用户jsh的日志被用户test123删除。
 
 危害：攻击者可以遍历日志id删除数据库中存在的所有日志
-
-
-
-给用户jsh创建消息
-
-![image-20260302135407720](/Users/yuntsy/Library/Application Support/typora-user-images/image-20260302135407720.png)
-
-
-
-使用test123的token删除这条消息
-
-![image-20260302135516257](/Users/yuntsy/Library/Application Support/typora-user-images/image-20260302135516257.png)
-
-响应成功
-
-在数据库中查询
-
-![image-20260302135551786](/Users/yuntsy/Library/Application Support/typora-user-images/image-20260302135551786.png)
-
-消息被删除
-
-用户test123删除了用户jsh的消息
