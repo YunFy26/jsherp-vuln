@@ -101,17 +101,28 @@ jsherp33-app     Up
 
 并输出证据目录 `poc_artifacts/run_YYYYmmdd_HHMMSS/`。
 
+说明：
+
+- 每个子脚本都使用 `STEP` 分段展示。
+- 每条关键操作前都会打印真实执行命令（以 `+` 开头）。
+- 每个步骤后都会打印当前数据库状态（例如删除前后目标行、用户/租户落库结果、对象是否变化）。
+- 这意味着你不需要截图，直接保存终端输出即可作为 PoC 证据。
+
 ---
 
 ## 3. 分项复现 PoC（完整命令）
 
 ## 3.1 高危 1 + 高危 2：Log/Msg 越权删除（IDOR）
 
-脚本会自动：
+该脚本按步骤输出：
 
-1. 在数据库插入 `jsh(user_id=63)` 所属的日志与消息
-2. 使用 `test123(user_id=131)` 的 token 执行删除
-3. 对比删除前后 DB 结果
+1. 登录拿到 `jsh/test123` token
+2. 查询 DB 基线（`jsh_log/jsh_msg` 总量）
+3. 插入受害者记录（归属 `user_id=63`）
+4. 查询受害者记录（删除前状态）
+5. `test123` 删除日志并立即查询 DB（删除后状态）
+6. `test123` 删除消息并立即查询 DB（删除后状态）
+7. 再次查询总量（最终状态）
 
 ```bash
 ./poc_artifacts/poc_idor_log_msg_seeded.sh
@@ -120,19 +131,26 @@ jsherp33-app     Up
 复现成功特征：
 
 - 删除接口返回 `{"code":200,...}`
-- 删除后目标行查询为空
+- 删除前 `SELECT ... WHERE id=...` 有数据，删除后同一查询为空
 
 ---
 
 ## 3.2 高危 3：registerUser 批量赋值
 
-脚本会以匿名注册方式提交敏感字段：
+该脚本按步骤输出：
+
+1. 查询注册前 DB 基线（用户数、租户数）
+2. 提交注册请求（含敏感字段）
+3. 查询 `jsh_user`（看 `ismanager` 等）
+4. 查询 `jsh_tenant`（看 `user_num_limit/expire_time`）
+5. 直接登录新账号
+6. 查询注册后 DB 基线（用户数、租户数）
+
+提交的敏感字段：
 
 - `ismanager=1`
 - `userNumLimit=9999999`
 - `expireTime=2099-12-31 23:59:59`
-
-并检查这些值是否进入 `jsh_user/jsh_tenant`。
 
 ```bash
 ./poc_artifacts/poc_register_mass_assignment.sh
@@ -156,6 +174,16 @@ jsherp33-app     Up
 ./poc_artifacts/poc_supplier_scope_bypass.sh
 ```
 
+该脚本按步骤输出：
+
+1. 获取 `jsh/test123` token
+2. 查询 `role=17` 的功能绑定（DB）
+3. 查询供应商/客户模块功能 ID（DB）
+4. 查询目标 `organId` 对应基础数据（DB）
+5. 用 `test123` 调用债务接口
+6. 用 `jsh` 做对照调用
+7. 再查一遍目标数据（DB 未变化）
+
 复现成功特征：
 
 - 输出中显示 role17 功能绑定不含供应商/客户菜单 ID
@@ -169,6 +197,16 @@ jsherp33-app     Up
 ./poc_artifacts/poc_supplier_idor.sh
 ```
 
+该脚本按步骤输出：
+
+1. 查询目标供应商记录（DB）
+2. 自动注册攻击账号（新租户）
+3. 查询攻击账号在 `jsh_user/jsh_tenant` 的状态（DB）
+4. 获取 `jsh` 与攻击账号 token
+5. `jsh` 正常读取（基线）
+6. 攻击账号跨租户读取同一 `organId`
+7. 再查目标供应商记录（DB）
+
 当前环境下常见现象：
 
 - 攻击账号调用返回 `500 获取数据失败`（被租户隔离拦截）
@@ -181,6 +219,7 @@ jsherp33-app     Up
 完整分析报告：
 
 - `poc_artifacts/jshERP3.3_4flows_poc_report.md`
+- `poc_artifacts/BEGINNER_POC.md`（小白专用：一步一命令 + 每步 DB 状态）
 
 已有证据输出示例：
 
