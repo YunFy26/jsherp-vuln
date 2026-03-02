@@ -1,0 +1,48 @@
+name: jsherp33
+
+services:
+  mysql:
+    image: mysql:5.7
+    platform: linux/amd64
+    container_name: jsherp33-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jsh_erp
+      MYSQL_USER: jsherp
+      MYSQL_PASSWORD: 123456
+    command:
+      [
+        "sh",
+        "-c",
+        "exec docker-entrypoint.sh mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci",
+      ]
+    volumes:
+      - ./db/jsh_erp.sql:/docker-entrypoint-initdb.d/jsh_erp.sql:ro
+      - ./jsherp.3.3/mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  jsherp:
+    image: jsherp:3.3
+    platform: linux/amd64
+    container_name: jsherp33-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      mysqlip: mysql
+      mysqlname: jsh_erp
+      mysqlusername: jsherp
+      mysqlpassword: 123456
+      redisip: 127.0.0.1
+      redisport: 6379
+      redispassword: 1234abcd
+      TZ: Asia/Shanghai
+    ports:
+      - "3000:3000"
+      - "9999:9999"
+    restart: unless-stopped

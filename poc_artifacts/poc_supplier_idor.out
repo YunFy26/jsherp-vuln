@@ -1,0 +1,10 @@
+[DB] target supplier
+mysql: [Warning] Using a password on the command line interface can be insecure.
+74	供应商5	供应商	5.000000	0.000000	63
+[Expected owner tenant=63] jsh query
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}
+[PoC] attacker tenant=132 query same organId
+{"code":500,"data":"获取数据失败"}
+[Context]
+jsh token: 402698b0a1c642b4afd6cf23d3f477c3_63
+attacker token: 3bdc92c3b4f94b848684cb13c2d69acf_132

@@ -1,0 +1,17 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+mysql: [Warning] Using a password on the command line interface can be insecure.
+mysql: [Warning] Using a password on the command line interface can be insecure.
+[Seed] log_id=20 msg_id=3
+[Before] victim rows
+mysql: [Warning] Using a password on the command line interface can be insecure.
+20	63	63	poc-log-owner-63-1772426343
+3	63	63	poc-msg-owner-63-1772426343
+[PoC-1] test123 deletes jsh log
+{"code":200,"data":{"message":"成功"}}
+[PoC-2] test123 deletes jsh msg
+{"code":200,"data":{"message":"成功"}}
+[After] victim rows
+mysql: [Warning] Using a password on the command line interface can be insecure.
+[Context]
+jsh token: 18250090c5224cc29726fd6887793d2d_63
+test123 token: ac01d2ba43914e269ba66432b0df2288_63

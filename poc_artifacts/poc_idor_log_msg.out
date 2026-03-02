@@ -1,0 +1,13 @@
+[Before] log row
+mysql: [Warning] Using a password on the command line interface can be insecure.
+[PoC] test123 delete jsh log id=2
+{"code":500,"data":{"message":"服务内部错误"}}[After] log row
+mysql: [Warning] Using a password on the command line interface can be insecure.
+[Before] msg row
+mysql: [Warning] Using a password on the command line interface can be insecure.
+[PoC] test123 delete jsh msg id=2
+{"code":500,"data":{"message":"服务内部错误"}}[After] msg row
+mysql: [Warning] Using a password on the command line interface can be insecure.
+[Context] tokens
+jsh token: bb6d5bed02634968b9e9529c90f17745_63
+test123 token: 525dfa5480934c1c957cbac0054d0a6e_63

