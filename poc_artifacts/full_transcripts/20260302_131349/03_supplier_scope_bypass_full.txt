@@ -1,0 +1,173 @@
++ set -e
++ BASE=http://127.0.0.1:9999/jshERP-boot
++ P=e10adc3949ba59abbe56e057f20f883e
++ step '1) 登录获取 token（jsh 与 test123）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 1) 登录获取 token（jsh 与 test123）'
+[STEP] 1) 登录获取 token（jsh 与 test123）
++ echo ==============================
+==============================
+++ login_token test123
+++ user=test123
+++ docker exec jsherp33-app sh -lc 'curl -s -X POST http://127.0.0.1:9999/jshERP-boot/user/login -H '\''Content-Type: application/json'\'' -d '\''{"loginName":"test123","password":"e10adc3949ba59abbe56e057f20f883e"}'\'''
+++ sed -n 's/.*"token":"\([^"]*\)".*/\1/p'
++ TOKEN_TEST=69f75a16ad0d41ea9b111c7f302880a5_63
+++ login_token jsh
+++ user=jsh
+++ docker exec jsherp33-app sh -lc 'curl -s -X POST http://127.0.0.1:9999/jshERP-boot/user/login -H '\''Content-Type: application/json'\'' -d '\''{"loginName":"jsh","password":"e10adc3949ba59abbe56e057f20f883e"}'\'''
+++ sed -n 's/.*"token":"\([^"]*\)".*/\1/p'
++ TOKEN_JSH=072b104fba7e4d12873c230a8733304d_63
++ echo 'test123 token: 69f75a16ad0d41ea9b111c7f302880a5_63'
+test123 token: 69f75a16ad0d41ea9b111c7f302880a5_63
++ echo 'jsh token: 072b104fba7e4d12873c230a8733304d_63'
+jsh token: 072b104fba7e4d12873c230a8733304d_63
++ step '2) 查看 test123 的角色功能绑定（数据库状态）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 2) 查看 test123 的角色功能绑定（数据库状态）'
+[STEP] 2) 查看 test123 的角色功能绑定（数据库状态）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,key_id,type,value,tenant_id FROM jsh_user_business WHERE type='\''RoleFunctions'\'' AND key_id=17;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,key_id,type,value,tenant_id FROM jsh_user_business WHERE type='\''RoleFunctions'\'' AND key_id=17;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,key_id,type,value,tenant_id FROM jsh_user_business WHERE type='RoleFunctions' AND key_id=17;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,key_id,type,value,tenant_id FROM jsh_user_business WHERE type='\''RoleFunctions'\'' AND key_id=17;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+69	17	RoleFunctions	[210][225][211][241][32][33][199][242][38][41][200][201][239][202][40][232][233][197][44][203][204][205][206][212]	63
++ step '3) 查看供应商/客户相关功能 ID（数据库状态）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 3) 查看供应商/客户相关功能 ID（数据库状态）'
+[STEP] 3) 查看供应商/客户相关功能 ID（数据库状态）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,name,url FROM jsh_function WHERE id IN (25,217,235,237) ORDER BY id;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,name,url FROM jsh_function WHERE id IN (25,217,235,237) ORDER BY id;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,name,url FROM jsh_function WHERE id IN (25,217,235,237) ORDER BY id;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,name,url FROM jsh_function WHERE id IN (25,217,235,237) ORDER BY id;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+25	供应商信息	/system/vendor
+217	客户信息	/system/customer
+235	客户对账	/report/customer_account
+237	供应商对账	/report/vendor_account
++ step '4) 查看将要读取的往来单位数据（数据库状态）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 4) 查看将要读取的往来单位数据（数据库状态）'
+[STEP] 4) 查看将要读取的往来单位数据（数据库状态）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_get,begin_need_pay,tenant_id FROM jsh_supplier WHERE id IN (57,58,74) ORDER BY id;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_get,begin_need_pay,tenant_id FROM jsh_supplier WHERE id IN (57,58,74) ORDER BY id;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_get,begin_need_pay,tenant_id FROM jsh_supplier WHERE id IN (57,58,74) ORDER BY id;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_get,begin_need_pay,tenant_id FROM jsh_supplier WHERE id IN (57,58,74) ORDER BY id;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+57	供应商1	供应商	0.000000	0.000000	63
+58	客户1	客户	0.000000	0.000000	63
+74	供应商5	供应商	0.000000	5.000000	63
++ step '5) 用低权限账号 test123 直接读取债务接口'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 5) 用低权限账号 test123 直接读取债务接口'
+[STEP] 5) 用低权限账号 test123 直接读取债务接口
++ echo ==============================
+==============================
++ for id in 57 58 74
++ echo 'organId=57 (attacker=test123)'
+organId=57 (attacker=test123)
++ run 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=57'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=57'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s 'http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=57' -H 'X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=57'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}+ echo
+
++ for id in 57 58 74
++ echo 'organId=58 (attacker=test123)'
+organId=58 (attacker=test123)
++ run 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=58'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=58'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s 'http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=58' -H 'X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=58'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}+ echo
+
++ for id in 57 58 74
++ echo 'organId=74 (attacker=test123)'
+organId=74 (attacker=test123)
++ run 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s 'http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74' -H 'X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 69f75a16ad0d41ea9b111c7f302880a5_63'\''"'
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}+ echo
+
++ step '6) 对照组：管理员 jsh 读取同样数据'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 6) 对照组：管理员 jsh 读取同样数据'
+[STEP] 6) 对照组：管理员 jsh 读取同样数据
++ echo ==============================
+==============================
++ for id in 57 58 74
++ echo 'organId=57 (control=jsh)'
+organId=57 (control=jsh)
++ run 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=57'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=57'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s 'http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=57' -H 'X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=57'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}+ echo
+
++ for id in 57 58 74
++ echo 'organId=58 (control=jsh)'
+organId=58 (control=jsh)
++ run 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=58'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=58'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s 'http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=58' -H 'X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=58'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}+ echo
+
++ for id in 57 58 74
++ echo 'organId=74 (control=jsh)'
+organId=74 (control=jsh)
++ run 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s 'http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74' -H 'X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s '\''http://127.0.0.1:9999/jshERP-boot/supplier/getBeginNeedByOrganId?organId=74'\'' -H '\''X-Access-Token: 072b104fba7e4d12873c230a8733304d_63'\''"'
+{"code":200,"data":{"needDebt":0,"eachAmount":0.000000,"finishDebt":0.000000}}+ echo
+
++ step '7) 验证接口调用后数据库未变化（数据库状态）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 7) 验证接口调用后数据库未变化（数据库状态）'
+[STEP] 7) 验证接口调用后数据库未变化（数据库状态）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_get,begin_need_pay,tenant_id FROM jsh_supplier WHERE id IN (57,58,74) ORDER BY id;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_get,begin_need_pay,tenant_id FROM jsh_supplier WHERE id IN (57,58,74) ORDER BY id;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_get,begin_need_pay,tenant_id FROM jsh_supplier WHERE id IN (57,58,74) ORDER BY id;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,supplier,type,begin_need_get,begin_need_pay,tenant_id FROM jsh_supplier WHERE id IN (57,58,74) ORDER BY id;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+57	供应商1	供应商	0.000000	0.000000	63
+58	客户1	客户	0.000000	0.000000	63
+74	供应商5	供应商	0.000000	5.000000	63
++ echo
+
++ echo '[Context]'
+[Context]
++ echo 'test123 token: 69f75a16ad0d41ea9b111c7f302880a5_63'
+test123 token: 69f75a16ad0d41ea9b111c7f302880a5_63
++ echo 'jsh token: 072b104fba7e4d12873c230a8733304d_63'
+jsh token: 072b104fba7e4d12873c230a8733304d_63

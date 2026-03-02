@@ -220,6 +220,7 @@ jsherp33-app     Up
 
 - `poc_artifacts/jshERP3.3_4flows_poc_report.md`
 - `poc_artifacts/BEGINNER_POC.md`（小白专用：一步一命令 + 每步 DB 状态）
+- `poc_artifacts/FULL_COMMAND_TRACE_REPORT.md`（不筛选，`sh -x` 全命令 + 全输出）
 
 已有证据输出示例：
 

